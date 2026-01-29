@@ -10,11 +10,6 @@
 #' @param sep separation character between numeration and actual name
 #'
 #' @return a character with all new names
-#' @export
-#'
-#' @examples
-#' enumerated_files_names()
-#' enumerated_files_names(path = ".", sep = " = ")
 enumerated_files_names <- function(path = ".", sep = "_") {
   names_folders <- list.files(path)
   if (length(names_folders) >= 100) {

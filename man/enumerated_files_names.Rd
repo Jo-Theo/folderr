@@ -17,7 +17,3 @@ a character with all new names
 \description{
 Gives a character vector of new numerated names for files in path
 }
-\examples{
-enumerated_files_names()
-enumerated_files_names(path = ".",sep =' = ')
-}

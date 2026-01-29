@@ -22,8 +22,8 @@ Can return a character vector of renamed files if rename = FALSE
 Renumerated files and folders names in path
 }
 \examples{
-renumerate_files(path = ".",sep ='_', check = TRUE, rename = FALSE)
+renumerate_files(path = ".", sep = "_", check = TRUE, rename = FALSE)
 \dontrun{
-renumerate_files(path = "my_files_adress",sep =' - ')
+renumerate_files(path = "my_files_adress", sep = " - ")
 }
 }
