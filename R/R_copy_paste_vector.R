@@ -24,5 +24,5 @@
 # ready to copy paste !
 #' 
 print_to_copy <- function(vector){
-  cat(paste0("c(",paste0("'",vector,"'",collapse = " ,"),")"))
+  cat(paste0("\nc(",paste0("'",vector,"'",collapse = " ,"),")\n"))
 }
