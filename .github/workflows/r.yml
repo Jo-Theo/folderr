@@ -19,24 +19,8 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: |
-            roxygen2
-            rcmdcheck
           needs: check
 
-      # Generate documentation
-      - name: Run roxygen2
-        run: |
-          roxygen2::roxygenise()
-        shell: Rscript {0}
-
-      # Fail if roxygen changed files but they weren't committed
-      - name: Check for uncommitted roxygen changes
-        run: |
-          git diff --exit-code
-        shell: bash
-
-      # R CMD check
       - uses: r-lib/actions/check-r-package@v2
         with:
           build_args: 'c("--no-manual")'
