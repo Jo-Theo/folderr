@@ -21,13 +21,19 @@ jobs:
           needs: check
           extra-packages: rcmdcheck
 
-      # Build + check
+      # Run R CMD check (quality gate)
       - uses: r-lib/actions/check-r-package@v2
         with:
           build_args: 'c("--no-manual")'
           error-on: '"error"'
 
-      # Create GitHub release
+      # Build tarball explicitly (THIS is the missing piece)
+      - name: Build source package
+        run: |
+          R CMD build .
+        shell: bash
+
+      # Attach tarball to GitHub Release
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
