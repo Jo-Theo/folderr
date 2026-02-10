@@ -97,7 +97,7 @@ chr_print_buffed <- function(x,type = "list"){
 #' Example: I want to use all columns names of a data.frame as a vector
 #'
 #' @param x a vector/list/data.frame/matrix to write manually
-#' @param shape = `NULL`decide what shape to print: only when x is a vector and not a list
+#' @param shape (default : `NULL`) decide what shape to print: only when x is a vector and not a list
 #'  - vector -> "vector"
 #'  - dyplr::select -> "select"
 #'  
