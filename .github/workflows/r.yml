@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - 'v*'
+permissions:
+  contents: write   # ← THIS fixes the 403
 
 jobs:
   build-release:
