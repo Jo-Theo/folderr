@@ -4,10 +4,10 @@
 \alias{enumerated_files_names}
 \title{Gives a character vector of new numerated names for files in path}
 \usage{
-enumerated_files_names(path = ".", sep = "_")
+enumerated_files_names(names_files, sep = "_")
 }
 \arguments{
-\item{path}{Location for folders and files to rename}
+\item{names_files}{file names to rename}
 
 \item{sep}{separation character between numeration and actual name}
 }

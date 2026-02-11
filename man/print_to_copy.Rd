@@ -9,7 +9,7 @@ print_to_copy(x, shape = NULL)
 \arguments{
 \item{x}{a vector/list/data.frame/matrix to write manually}
 
-\item{shape}{= `NULL`decide what shape to print: only when x is a vector and not a list
+\item{shape}{(default : `NULL`) decide what shape to print: only when x is a vector and not a list
 - vector -> "vector"
 - dyplr::select -> "select"}
 }
