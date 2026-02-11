@@ -1,3 +1,5 @@
+if(getRversion() >= "2.15.1")  utils::globalVariables(c("."))
+
 # Some useful keyboard shortcuts for package authoring:
 #   Insert Roxygen skeleton :  'Crtl + Shift + Alt + R'
 #   Install Package:           'Ctrl + Shift + B'

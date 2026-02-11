@@ -11,12 +11,13 @@ renumerate_folders(path = ".", ...)
 
 \item{...}{Additionnal parameters : 
 \describe{
-    \item{folders}{TRUE should it rename folders}
-    \item{files}{FALSE should it rename files}
-    \item{sep}{"_" separation character between numeration and actual name}
-    \item{hidden}{TRUE Consider hidden files/folders ?}
-    \item{check}{TRUE Boolean asks for user validation ?}
-    \item{rename}{TRUE  Boolean Actually rename ?}
+    \item{folders}{TRUE, should it rename folders}
+    \item{files}{FALSE, should it rename files}
+    \item{sep}{"_", separation character between numeration and actual name}
+    \item{hidden}{TRUE, Consider hidden files/folders ?}
+    \item{check}{TRUE, Boolean asks for user validation ?}
+    \item{rename}{TRUE,  Boolean Actually rename ?}
+    \item{without}{character vector, grep like pattern to be excluded from enumeration}
   }}
 }
 \value{
