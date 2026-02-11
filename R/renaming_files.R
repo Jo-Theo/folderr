@@ -1,5 +1,5 @@
 # Some useful keyboard shortcuts for package authoring:
-#
+#   Insert Roxygen skeleton :  'Crtl + Shift + Alt + R'
 #   Install Package:           'Ctrl + Shift + B'
 #   Check Package:             'Ctrl + Shift + E'
 #   Test Package:              'Ctrl + Shift + T'
@@ -10,13 +10,12 @@
 #' @param sep separation character between numeration and actual name
 #'
 #' @return a character with all new names
-enumerated_files_names <- function(path = ".", sep = "_") {
-  names_folders <- list.files(path)
-  if (length(names_folders) >= 100) {
+enumerated_files_names <- function(names_files, sep = "_") {
+  if (length(names_files) >= 100) {
     warning("To many files, we didn't change them")
-    return(names_folders)
+    return(names_files)
   }
-  new_names <- names_folders %>%
+  new_names <- names_files %>%
     purrr::map_chr(function(name) {
       if (nchar(name) >= 1 && substring(name, 1, 1) %in% 0:9) {
         if (nchar(name) >= 2 && substring(name, 2, 2) %in% 0:9) {
@@ -61,7 +60,7 @@ enumerated_files_names <- function(path = ".", sep = "_") {
 
 
 
-  new_num <- first:(length(names_folders) - (first == 0))
+  new_num <- first:(length(names_files) - (first == 0))
 
 
   if (max(new_num) >= 10) {
@@ -82,32 +81,82 @@ enumerated_files_names <- function(path = ".", sep = "_") {
 }
 
 
-#' Renumerated files and folders names in path
+
+
+#' Renumerated files and/or folders names in path
 #'
 #' @param path Location for folders and files to rename
-#' @param sep separation character between numeration and actual name
-#' @param check  Boolean asks user validation ?
-#' @param rename Boolean Actually rename ?
+#' @param ... :  Additionnal parameters : 
+#'  - `folders = TRUE`: should it rename folders
+#'  - `files = FALSE`: should it rename files
+#'  - `sep = "_"` : separation character between numeration and actual name
+#'  - `hidden = TRUE`: Consider hidden files/folders
+#'  - `check = TRUE`: Boolean asks for user validation ?
+#'  - `rename = TRUE`: Boolean Actually rename ?
 #'
 #' @return Can return a character vector of renamed files if rename = FALSE
 #' @export
 #'
 #' @examples
-#' renumerate_files(path = ".", sep = "_", check = TRUE, rename = FALSE)
+#' renumerate_folders(path = ".", rename = FALSE)
 #' \dontrun{
-#' renumerate_files(path = "my_files_adress", sep = " - ")
+#' renumerate_folders(path = "my_files_adress", 
+#'                    sep = " - ", files = TRUE, 
+#'                    folders = FALSE)
 #' }
-renumerate_files <- function(path = ".", sep = "_", check = TRUE, rename = TRUE) {
-  new_names <- enumerated_files_names(path, sep)
-  if (rename) {
+renumerate_folders <- function(path = "." , ...) {
+  default_args <- list(folders = TRUE, 
+                       files = FALSE,
+                       sep = "_",
+                       hidden = FALSE,
+                       check = TRUE,
+                       rename = TRUE)
+  
+  args <- list(...)
+  empty_names <- names(args)==""
+  if(sum(empty_names) != 0){
+    args <- args[!empty_names]
+    warning("There can't be another unnamed agrument than 'path', arguments ignored")
+  }
+  
+  weird_names <- setdiff(names(args),names(default_args))
+
+  if(length(weird_names) != 0){
+    stop("argument",ifelse(length(weird_names)>1,"s "," "),paste0("'",weird_names,"'",collapse = ", "),
+         " does not exist.\n Only : 'path', 'folders', 'files', 'sep', 'hidden', 'check' and 'rename' (see with ?folderr::renumerate_folders)")
+  }
+  default_args[names(args)] <- args
+  args <- default_args
+  
+  if(args$hidden){
+    all_names <- list.files(path,all.files = TRUE,no..=TRUE)
+  }else{
+    all_names <- list.files(path)
+  }
+  dir_names <- list.dirs(path,recursive = FALSE,
+                         full.names = FALSE)
+  
+  if(args$folders & args$files){
+    selection <- all_names
+  }else if(args$folders){
+    selection <- intersect(all_names,dir_names)
+  }else if(args$files){
+    selection <- setdiff(all_names,dir_names)
+  }else{
+    stop("No files nor folders are selected")
+    
+  }
+  
+  new_names <- enumerated_files_names(selection, args$sep)
+  if (args$rename) {
     cat(paste0("\nNew_name : ", paste0("'", new_names, "'", collapse = ", ")))
-    if (check) {
+    if (args$check) {
       answer <- readline("Do you want to renames files y or N: ")
     } else {
       answer <- "y"
     }
     if (answer == "y") {
-      file.rename(paste0(path, "/", list.files(path)), paste0(path, "/", new_names))
+      file.rename(paste0(path, "/", selection), paste0(path, "/", new_names))
       cat("\nFiles successfully renamed\n")
     } else {
       cat("\nAction Canceled\n")
