@@ -94,6 +94,7 @@ enumerated_files_names <- function(names_files, sep = "_") {
 #'     \item{hidden}{TRUE, Consider hidden files/folders ?}
 #'     \item{check}{TRUE, Boolean asks for user validation ?}
 #'     \item{rename}{TRUE,  Boolean Actually rename ?}
+#'     \item{without}{character vector, grep like pattern to be excluded from enumeration}
 #'   }
 #'
 #' @return Can return a character vector of renamed files if rename = FALSE
@@ -112,7 +113,8 @@ renumerate_folders <- function(path = "." , ...) {
                        sep = "_",
                        hidden = FALSE,
                        check = TRUE,
-                       rename = TRUE)
+                       rename = TRUE,
+                       without = character())
   
   args <- list(...)
   empty_names <- names(args)==""
@@ -146,7 +148,13 @@ renumerate_folders <- function(path = "." , ...) {
     selection <- setdiff(all_names,dir_names)
   }else{
     stop("No files nor folders are selected")
-    
+  }
+  for(pattern_i in args$without){
+    selection <- selection %>% 
+      .[!grepl(pattern_i,.)]
+  }
+  if(length(selection)==0){
+    stop("No file or folder selected after applying without argument")
   }
   
   new_names <- enumerated_files_names(selection, args$sep)
