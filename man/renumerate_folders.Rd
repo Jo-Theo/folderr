@@ -9,13 +9,15 @@ renumerate_folders(path = ".", ...)
 \arguments{
 \item{path}{Location for folders and files to rename}
 
-\item{...}{:  Additionnal parameters : 
-- `folders = TRUE`: should it rename folders
-- `files = FALSE`: should it rename files
-- `sep = "_"` : separation character between numeration and actual name
-- `hidden = TRUE`: Consider hidden files/folders
-- `check = TRUE`: Boolean asks for user validation ?
-- `rename = TRUE`: Boolean Actually rename ?}
+\item{...}{Additionnal parameters : 
+\describe{
+    \item{folders}{TRUE should it rename folders}
+    \item{files}{FALSE should it rename files}
+    \item{sep}{"_" separation character between numeration and actual name}
+    \item{hidden}{TRUE Consider hidden files/folders ?}
+    \item{check}{TRUE Boolean asks for user validation ?}
+    \item{rename}{TRUE  Boolean Actually rename ?}
+  }}
 }
 \value{
 Can return a character vector of renamed files if rename = FALSE
