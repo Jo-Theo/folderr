@@ -2,5 +2,5 @@
 
 export("%>%")
 export(print_to_copy)
-export(renumerate_files)
+export(renumerate_folders)
 importFrom(magrittr,"%>%")

@@ -6,7 +6,7 @@
 
 #' Gives a character vector of new numerated names for files in path
 #'
-#' @param path Location for folders and files to rename
+#' @param names_files file names to rename
 #' @param sep separation character between numeration and actual name
 #'
 #' @return a character with all new names
