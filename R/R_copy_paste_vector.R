@@ -46,7 +46,16 @@ chr_print_vector <- function(x){
   }else{
     names_vec <- rep("",length(x))
   }
-  if(suppressWarnings(any(is.na(as.numeric(x))))){
+  
+  if(is.factor(x)){
+    class_begin <- "as.factor(c(" 
+    class_end <- "))"
+  }else{
+    class_begin <- "c(" 
+    class_end <- ")"
+  }
+
+  if(suppressWarnings(any(is.na(as.numeric(x)))) | is.factor(x)){
     quotes <-  rep(NA,length(x))
     quotes[!grepl(x=x,pattern = '"')] <- '"'
     quotes[is.na(quotes) & !grepl(x=x,pattern = "'")] <- "'"
@@ -56,7 +65,7 @@ chr_print_vector <- function(x){
   if(any(is.na(quotes))){
     stop("Some characters contain both ' and",' " ',"quotes inside them can't print them quoted proprely")
   }else{
-    paste0("c(",paste0(names_vec,quotes,x,quotes,collapse = ", "),")")
+    paste0(class_begin,paste0(names_vec,quotes,x,quotes,collapse = ", "),class_end)
   }
 }
 
@@ -87,10 +96,36 @@ chr_print_buffed <- function(x,type = "list"){
 }
 
 
+#' copy_to_clipboard
+#' Safe wrapper for clipr::write_clip. I want to use it but it doesn't pass checks correctly
+#'
+#' @param x string to copy to clip board
+#'
+#' @return clipr::write_clip(x) if it can
+copy_to_clipboard <- function(x) {
+  
+  if (!interactive()) {
+    message("Clipboard not available in non-interactive session.")
+    return(invisible(FALSE))
+  }
+  
+  if (!requireNamespace("clipr", quietly = TRUE)) {
+    message("Package 'clipr' not installed.")
+    return(invisible(FALSE))
+  }
+  
+  if (!clipr::clipr_available()) {
+    message("No clipboard available.")
+    return(invisible(FALSE))
+  }
+  
+  clipr::write_clip(x)
+  invisible(TRUE)
+}
 
 
 
-#' Print a vector as you would write it manually.
+#' Add to clipboard text describing x as you would write it manually in R.
 #' 
 #' @description
 #' Mainly usefull when i need to hard code a set of values that are to be extracted. 
@@ -115,50 +150,50 @@ chr_print_buffed <- function(x,type = "list"){
 #' vec_to_hard_code <- which(data > 250) %>% 
 #'    names()
 #'    
-#' print_to_copy(vec_to_hard_code)
-#' print_to_copy(vec_to_hard_code,shape = 'select')
+#' add_to_clipboard(vec_to_hard_code)
+#' add_to_clipboard(vec_to_hard_code,shape = 'select')
 #' 
 #' list_to_hard_code <- list(a = sample(1:5,size = 5),
 #'                                 b = sample(1:5,size = 10,
 #'                                 replace = TRUE))
-#' print_to_copy(list_to_hard_code)
+#' add_to_clipboard(list_to_hard_code)
 #' 
 #' data_to_hard_code <- data.frame(a = sample(1:10,size = 10),
 #'                                 b = sample(1:5,size = 10,
 #'                                 replace = TRUE))
-#' print_to_copy(data_to_hard_code)
+#' add_to_clipboard(data_to_hard_code)
 #' 
-#' print_to_copy(as.matrix(data_to_hard_code))
-#' # ready to copy paste !
+#' add_to_clipboard(as.matrix(data_to_hard_code))
+#' # ready to paste ! Press Ctrl + V 
 #' 
-print_to_copy <- function(x, shape = NULL){
+add_to_clipboard <- function(x, shape = NULL){
   if('data.frame' %in% class(x)){
-    cat(paste0('\n',chr_print_buffed(x,type = 'data.frame'),'\n'))
+    res <- chr_print_buffed(x,type = 'data.frame')
     
   }else if(is.numeric(x) | is.character(x) | is.logical(x) | is.factor(x)){
     if(is.matrix(x)){
-      cat(paste0("\nmatrix(",chr_print_vector(x),", nrow = ",nrow(x),")\n"))
+      res <- (paste0("matrix(",chr_print_vector(x),", nrow = ",nrow(x),")"))
       
     }else{
       if(is.null(shape)){
         shape <- "vector"
       }
       if(shape == "vector"){
-        cat(paste0('\n',chr_print_vector(x),'\n'))
+        res <- chr_print_vector(x)
       }else if(shape == 'select'){
         to_quote <- get_chr_to_quote(x)
         quotes <- ifelse(to_quote,'`','')
-        cat(paste0("\n%>%\nselect(",paste0(quotes,x,quotes,collapse = ", "),")\n"))
+        res <- paste0("%>%\nselect(",paste0(quotes,x,quotes,collapse = ", "),")")
       }else{
         stop("x is a vector: shape agrument can only be 'vector' or 'select'")
       }
     }
     
   }else if(is.list(x)){
-    cat(paste0('\n',chr_print_buffed(x,type = 'list'),'\n'))
+    res <- chr_print_buffed(x,type = 'list')
   }else{
     stop("Uncoded class for x")
   }
+  copy_to_clipboard(res)
 }
-
 
