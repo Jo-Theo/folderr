@@ -55,9 +55,10 @@ chr_print_vector <- function(x){
     class_end <- ")"
   }
 
-  if(suppressWarnings(any(is.na(as.numeric(x)))) | is.factor(x)){
+  if(suppressWarnings(any(!is.na(x) & is.na(as.numeric(x)))) | is.factor(x)){
     quotes <-  rep(NA,length(x))
-    quotes[!grepl(x=x,pattern = '"')] <- '"'
+    quotes[is.na(x)] <- ""
+    quotes[is.na(quotes) & !grepl(x=x,pattern = '"')] <- '"'
     quotes[is.na(quotes) & !grepl(x=x,pattern = "'")] <- "'"
   }else{
     quotes <- "" 
