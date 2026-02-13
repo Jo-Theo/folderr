@@ -4,5 +4,7 @@ Attempt of creating an R folder manager package/R Writing tool. Might be only us
 
 You can install with: 
 ``` R 
-install.packages("https://github.com/Jo-Theo/folderr/releases/download/v0.1.2/folderr_0.1.2.tar.gz")
+install.packages("https://github.com//releases/download/v0.1.2/folderr_0.1.2.tar.gz")
+library(remotes)
+remotes::install_github("Jo-Theo/folderr")
 ```
