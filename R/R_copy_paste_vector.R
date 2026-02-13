@@ -34,7 +34,7 @@ get_chr_to_quote <- function(x){
 
 #' Get character encoding the vector hard writing
 #'
-#' @param x character
+#' @param x r vector
 #'
 #' @return a chr
 chr_print_vector <- function(x){
@@ -76,56 +76,69 @@ chr_print_vector <- function(x){
 
 #' Get character encoding the list or data.fraùe hard writing
 #'
-#' @param x character
+#' @param x list or data.frame
 #' @param type 'list' or 'description'data.frame', what is the wanted results
+#' @param add_space for recurcive use of function keep nb of " " tabulation 
 #'
 #' @return a chr
-chr_print_buffed <- function(x,type = "list"){
+chr_print_buffed <- function(x,type = "list",add_space = 0){
   names_vec <- names(x)
   if(!is.null(names_vec)){
     to_quote <- get_chr_to_quote(names_vec) 
     quotes <- ifelse(to_quote,'`','')
-    names_vec <- ifelse(names_vec == "",paste0("V",1:length(x)," = "),paste0(quotes,names_vec,quotes," = "))
+    names_vec <- ifelse(names_vec == "","",paste0(quotes,names_vec,quotes," = "))
   }else{
     names_vec <- ""
   }
   if(type == 'list'){
     preambule <-   'list('
-    intermed <- ",\n     "
   }else{
     preambule <-   'data.frame('
-    intermed <- ",\n           "
   }
-  paste0(preambule,paste0(names_vec,purrr::map_chr(x,~print_for_r(.x,add_space="")),
+  add_space <- add_space + nchar(preambule) 
+  intermed <- paste0(",\n",paste0(rep(" ",add_space),collapse = ""))
+  add_space <- add_space + nchar(names_vec)
+  paste0(preambule,paste0(names_vec,purrr::map2_chr(x,add_space,~print_for_r(.x,add_space=.y)),
                           collapse = intermed),")")
 }
 
-
-#' copy_to_clipboard
-#' Safe wrapper for clipr::write_clip. I want to use it but it doesn't pass checks correctly
+#' create character describing x as you would write it manually in R.
+#' 
 #'
-#' @param x string to copy to clip board
-#'
-#' @return clipr::write_clip(x) if it can
-copy_to_clipboard <- function(x) {
-  
-  if (!interactive()) {
-    message("Clipboard not available in non-interactive session.")
-    return(invisible(FALSE))
+#' @param x a vector/list/data.frame/matrix to write manually
+#' @param shape (default : `NULL`) decide what shape to print: only when x is a vector and not a list
+#' @param add_space for recurcive use of function keep nb of " " tabulation 
+#'  - vector -> "vector"
+#'  - dyplr::select -> "select"
+#'  
+print_for_r <- function(x, shape = NULL, add_space = 0){
+  if('data.frame' %in% class(x)){
+    res <- chr_print_buffed(x,type = 'data.frame', add_space)
+    
+  }else if(is.numeric(x) | is.character(x) | is.logical(x) | is.factor(x)){
+    if(is.matrix(x)){
+      res <- (paste0("matrix(",chr_print_vector(x),", nrow = ",nrow(x),")"))
+    }else{
+      if(is.null(shape)){
+        shape <- "vector"
+      }
+      if(shape == "vector"){
+        res <- chr_print_vector(x)
+      }else if(shape == 'select'){
+        to_quote <- get_chr_to_quote(x)
+        quotes <- ifelse(to_quote,'`','')
+        res <- paste0("%>%\nselect(",paste0(quotes,x,quotes,collapse = ", "),")")
+      }else{
+        stop("x is a vector: shape agrument can only be 'vector' or 'select'")
+      }
+    }
+    
+  }else if(is.list(x)){
+    res <- chr_print_buffed(x,type = 'list', add_space)
+  }else{
+    stop("Uncoded class for x")
   }
-  
-  if (!requireNamespace("clipr", quietly = TRUE)) {
-    message("Package 'clipr' not installed.")
-    return(invisible(FALSE))
-  }
-  
-  if (!clipr::clipr_available()) {
-    message("No clipboard available.")
-    return(invisible(FALSE))
-  }
-  
-  clipr::write_clip(x)
-  invisible(TRUE)
+  res
 }
 
 
@@ -171,67 +184,59 @@ copy_to_clipboard <- function(x) {
 #' add_to_clipboard(as.matrix(data_to_hard_code))
 #' # ready to paste ! Press Ctrl + V 
 #' 
-add_to_clipboard <- function(x, shape = NULL){
-  if('data.frame' %in% class(x)){
-    res <- chr_print_buffed(x,type = 'data.frame')
-    
-  }else if(is.numeric(x) | is.character(x) | is.logical(x) | is.factor(x)){
-    if(is.matrix(x)){
-      res <- (paste0("matrix(",chr_print_vector(x),", nrow = ",nrow(x),")"))
-      
-    }else{
-      if(is.null(shape)){
-        shape <- "vector"
-      }
-      if(shape == "vector"){
-        res <- chr_print_vector(x)
-      }else if(shape == 'select'){
-        to_quote <- get_chr_to_quote(x)
-        quotes <- ifelse(to_quote,'`','')
-        res <- paste0("%>%\nselect(",paste0(quotes,x,quotes,collapse = ", "),")")
-      }else{
-        stop("x is a vector: shape agrument can only be 'vector' or 'select'")
-      }
-    }
-    
-  }else if(is.list(x)){
-    res <- chr_print_buffed(x,type = 'list')
-  }else{
-    stop("Uncoded class for x")
+copy_to_clipboard <- function(x, shape = NULL) {
+  
+  if (!interactive()) {
+    message("Clipboard not available in non-interactive session.")
+    return(invisible(FALSE))
   }
-  copy_to_clipboard(res)
+  
+  if (!requireNamespace("clipr", quietly = TRUE)) {
+    message("Package 'clipr' not installed.")
+    return(invisible(FALSE))
+  }
+  
+  if (!clipr::clipr_available()) {
+    message("No clipboard available.")
+    return(invisible(FALSE))
+  }
+  
+  clipr::write_clip(print_for_r(x,shape = shape))
+  invisible(TRUE)
 }
 
-print_for_r <- function(x, shape = NULL, add_space = ""){
-  if('data.frame' %in% class(x)){
-    res <- chr_print_buffed(x,type = 'data.frame')
-    print("data.frame")
-    
-  }else if(is.numeric(x) | is.character(x) | is.logical(x) | is.factor(x)){
-    if(is.matrix(x)){
-      res <- (paste0("matrix(",chr_print_vector(x),", nrow = ",nrow(x),")"))
-      print("matrix")
-    }else{
-      if(is.null(shape)){
-        shape <- "vector"
-      }
-      if(shape == "vector"){
-        res <- chr_print_vector(x)
-        print('vector')
-      }else if(shape == 'select'){
-        to_quote <- get_chr_to_quote(x)
-        quotes <- ifelse(to_quote,'`','')
-        res <- paste0("%>%\nselect(",paste0(quotes,x,quotes,collapse = ", "),")")
-      }else{
-        stop("x is a vector: shape agrument can only be 'vector' or 'select'")
-      }
-    }
-    
-  }else if(is.list(x)){
-    print("list")
-    res <- chr_print_buffed(x,type = 'list')
-  }else{
-    stop("Uncoded class for x")
-  }
-  res
-}
+# 
+# 
+# 
+# add_to_clipboard <- function(x, shape = NULL){
+#   if('data.frame' %in% class(x)){
+#     res <- chr_print_buffed(x,type = 'data.frame')
+#     
+#   }else if(is.numeric(x) | is.character(x) | is.logical(x) | is.factor(x)){
+#     if(is.matrix(x)){
+#       res <- (paste0("matrix(",chr_print_vector(x),", nrow = ",nrow(x),")"))
+#       
+#     }else{
+#       if(is.null(shape)){
+#         shape <- "vector"
+#       }
+#       if(shape == "vector"){
+#         res <- chr_print_vector(x)
+#       }else if(shape == 'select'){
+#         to_quote <- get_chr_to_quote(x)
+#         quotes <- ifelse(to_quote,'`','')
+#         res <- paste0("%>%\nselect(",paste0(quotes,x,quotes,collapse = ", "),")")
+#       }else{
+#         stop("x is a vector: shape agrument can only be 'vector' or 'select'")
+#       }
+#     }
+#     
+#   }else if(is.list(x)){
+#     res <- chr_print_buffed(x,type = 'list')
+#   }else{
+#     stop("Uncoded class for x")
+#   }
+#   copy_to_clipboard(res)
+# }
+# 
+# 
