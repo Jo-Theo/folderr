@@ -46,13 +46,17 @@ chr_print_vector <- function(x){
   }else{
     names_vec <- rep("",length(x))
   }
-  
-  if(is.factor(x)){
-    class_begin <- "as.factor(c(" 
-    class_end <- "))"
-  }else{
+  if(length(x)>1){
     class_begin <- "c(" 
     class_end <- ")"
+  }else{
+    class_begin <- "" 
+    class_end <- ""
+  }
+  
+  if(is.factor(x)){
+    class_begin <- paste0("as.factor(",class_begin) 
+    class_end <- paste0(")",class_end) 
   }
 
   if(suppressWarnings(any(!is.na(x) & is.na(as.numeric(x)))) | is.factor(x)){
@@ -81,9 +85,9 @@ chr_print_buffed <- function(x,type = "list"){
   if(!is.null(names_vec)){
     to_quote <- get_chr_to_quote(names_vec) 
     quotes <- ifelse(to_quote,'`','')
-    names_vec <- ifelse(names_vec == "",paste0("V",1:ncol(x)," = "),paste0(quotes,names_vec,quotes," = "))
+    names_vec <- ifelse(names_vec == "",paste0("V",1:length(x)," = "),paste0(quotes,names_vec,quotes," = "))
   }else{
-    names_vec <- paste0("V",1:length(x)," = ")
+    names_vec <- ""
   }
   if(type == 'list'){
     preambule <-   'list('
@@ -92,8 +96,8 @@ chr_print_buffed <- function(x,type = "list"){
     preambule <-   'data.frame('
     intermed <- ",\n           "
   }
-  paste0(preambule,paste0(names_vec,purrr::map_chr(x,~chr_print_vector(.x)),
-                          collapse = intermed),")\n")
+  paste0(preambule,paste0(names_vec,purrr::map_chr(x,~print_for_r(.x,add_space="")),
+                          collapse = intermed),")")
 }
 
 
@@ -198,3 +202,36 @@ add_to_clipboard <- function(x, shape = NULL){
   copy_to_clipboard(res)
 }
 
+print_for_r <- function(x, shape = NULL, add_space = ""){
+  if('data.frame' %in% class(x)){
+    res <- chr_print_buffed(x,type = 'data.frame')
+    print("data.frame")
+    
+  }else if(is.numeric(x) | is.character(x) | is.logical(x) | is.factor(x)){
+    if(is.matrix(x)){
+      res <- (paste0("matrix(",chr_print_vector(x),", nrow = ",nrow(x),")"))
+      print("matrix")
+    }else{
+      if(is.null(shape)){
+        shape <- "vector"
+      }
+      if(shape == "vector"){
+        res <- chr_print_vector(x)
+        print('vector')
+      }else if(shape == 'select'){
+        to_quote <- get_chr_to_quote(x)
+        quotes <- ifelse(to_quote,'`','')
+        res <- paste0("%>%\nselect(",paste0(quotes,x,quotes,collapse = ", "),")")
+      }else{
+        stop("x is a vector: shape agrument can only be 'vector' or 'select'")
+      }
+    }
+    
+  }else if(is.list(x)){
+    print("list")
+    res <- chr_print_buffed(x,type = 'list')
+  }else{
+    stop("Uncoded class for x")
+  }
+  res
+}
