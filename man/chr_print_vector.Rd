@@ -7,7 +7,7 @@
 chr_print_vector(x)
 }
 \arguments{
-\item{x}{character}
+\item{x}{r vector}
 }
 \value{
 a chr

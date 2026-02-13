@@ -4,12 +4,14 @@
 \alias{chr_print_buffed}
 \title{Get character encoding the list or data.fraùe hard writing}
 \usage{
-chr_print_buffed(x, type = "list")
+chr_print_buffed(x, type = "list", add_space = 0)
 }
 \arguments{
-\item{x}{character}
+\item{x}{list or data.frame}
 
 \item{type}{'list' or 'description'data.frame', what is the wanted results}
+
+\item{add_space}{for recurcive use of function keep nb of " " tabulation}
 }
 \value{
 a chr

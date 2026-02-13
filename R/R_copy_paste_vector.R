@@ -5,7 +5,7 @@
 #'
 #' @param ... ok
 #' @param .name_repair ok 
-#'
+#' @noRd
 #' @return bind rows
 bind_cols <- function(...,
                       .name_repair = c("unique", "universal", "check_unique", "minimal")){
@@ -168,23 +168,23 @@ print_for_r <- function(x, shape = NULL, add_space = 0){
 #' vec_to_hard_code <- which(data > 250) %>% 
 #'    names()
 #'    
-#' add_to_clipboard(vec_to_hard_code)
-#' add_to_clipboard(vec_to_hard_code,shape = 'select')
+#' rclip(vec_to_hard_code)
+#' rclip(vec_to_hard_code,shape = 'select')
 #' 
 #' list_to_hard_code <- list(a = sample(1:5,size = 5),
 #'                                 b = sample(1:5,size = 10,
 #'                                 replace = TRUE))
-#' add_to_clipboard(list_to_hard_code)
+#' rclip(list_to_hard_code)
 #' 
 #' data_to_hard_code <- data.frame(a = sample(1:10,size = 10),
 #'                                 b = sample(1:5,size = 10,
 #'                                 replace = TRUE))
-#' add_to_clipboard(data_to_hard_code)
+#' rclip(data_to_hard_code)
 #' 
-#' add_to_clipboard(as.matrix(data_to_hard_code))
+#' rclip(as.matrix(data_to_hard_code))
 #' # ready to paste ! Press Ctrl + V 
 #' 
-copy_to_clipboard <- function(x, shape = NULL) {
+rclip <- function(x, shape = NULL) {
   
   if (!interactive()) {
     message("Clipboard not available in non-interactive session.")
